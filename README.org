@@ -1,0 +1,7 @@
+* Advent of Code 2018
+
+[[https://adventofcode.com/][Advent of Code]] solutions for 2018.
+
+Mostly in Scala.
+
+~*.sc~ files are Scala Scripts, run with the [[http://ammonite.io/][Ammonite]] REPL.
