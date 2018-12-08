@@ -52,6 +52,13 @@ def part1(rec: Record) = {
   guard * min
 }
 
+def part2(rec: Record) = {
+  val (guard, (_, min)) = rec.mapValues { sleeps =>
+    sleeps.zipWithIndex.maxBy { case (days, min) => days }
+  }.maxBy { case (guard, (days, min)) => days }
+  guard * min
+}
+
 @main
 def main(fname: String = "input04.txt") = {
   val input =
@@ -61,5 +68,7 @@ def main(fname: String = "input04.txt") = {
       .map(parse)
       .sortBy(_.dt)
   val data = process(input)
+
   println(s"Part 1: ${part1(data)}")
+  println(s"Part 2: ${part2(data)}")
 }
