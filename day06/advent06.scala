@@ -13,6 +13,12 @@ case class Point(x: Int, y: Int) {
   lazy val ns = Seq(up, down, left, right)
 }
 
+/*
+ * currently this requires a large-ish stack size:
+ *     scala -J-Xss2m
+ *  which doesn't feel right.
+ */
+
 class Advent06(input: Seq[Point]) {
 
   val start = input.sortBy(p => p.x + p.y).head
