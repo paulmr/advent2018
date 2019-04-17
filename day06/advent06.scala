@@ -39,7 +39,8 @@ class Advent06(input: Seq[Point]) {
         if(cl == -1) 0 else {
           val ns = p.ns.filter(n => closest(n) == cl)
           if(ns.exists(n => infinite(p, n))) -1 else {
-            ns.map(go).sum + 1
+            val sizes = ns.map(go)
+            if(sizes.exists(_ == -1)) -1 else sizes.sum + 1
           }
         }
       }
