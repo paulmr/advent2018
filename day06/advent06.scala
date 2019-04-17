@@ -13,15 +13,7 @@ case class Point(x: Int, y: Int) {
   lazy val ns = Seq(up, down, left, right)
 }
 
-/*
- * currently this requires a large-ish stack size:
- *     scala -J-Xss2m
- *  which doesn't feel right.
- */
-
 class Advent06(input: Seq[Point]) {
-
-  val start = input.sortBy(p => p.x + p.y).head
 
   def closest(p0: Point) = {
     val dists = input.map(p0 - _).zipWithIndex.sortBy(_._1)
@@ -36,23 +28,35 @@ class Advent06(input: Seq[Point]) {
 
   def infinite(a: Point, b: Point) = (input map { p => (p - a) - (p - b) }).forall(_ < 0)
 
-  def sizeOf(start: Point) = {
+  def sizeOf(measure: Point => Int)(pred: Point => Boolean)(start: Point) = {
     val seen = scala.collection.mutable.Set.empty[Point]
-    def go(p: Point): Int = {
-      if(seen.contains(p)) 0 else {
-        seen += p
-        val cl = closest(p)
-        if(cl == -1) 0 else {
-          val ns = p.ns.filter(n => closest(n) == cl)
-          if(ns.exists(n => infinite(p, n))) -1 else {
-            val sizes = ns.map(go)
-            if(sizes.exists(_ == -1)) -1 else sizes.sum + 1
+    @annotation.tailrec
+    def go(ps: List[Point], acc: Int): Int = ps match {
+      case Nil => acc
+      case p :: rest =>
+        if(seen.contains(p)) go(rest, acc)
+        else {
+          seen += p
+          val cl = measure(p)
+          if(cl == -1) go(rest, acc)
+          else {
+            val ns = p.ns.filter(pred)
+            if(ns.exists(n => infinite(p, n))) -1
+            else {
+              go(ps.tail ++ ns, acc + 1)
+            }
           }
         }
-      }
     }
-    go(start)
+    go(List(start), 0)
   }
+
+  def part1 = input.map { p =>
+    val cl = closest(p)
+    sizeOf(closest)(closest(_) == closest(p))(p)
+  }.sorted.reverse.head
+  // def part2 = {
+  // }
 }
 
 object Advent06 {
@@ -65,10 +69,10 @@ object Advent06 {
 
     val a = new Advent06(input)
 
-    def expect(p: Point, exp: Int) = {
-      val actual = a.sizeOf(p)
-      assert(actual == exp, s"$p exp: $exp, actual: $actual")
-    }
+    // def expect(p: Point, exp: Int) = {
+    //   val actual = a.sizeOf(p)
+    //   assert(actual == exp, s"$p exp: $exp, actual: $actual")
+    // }
 
     // expect(Point(5, 5), 17)
     // expect(Point(3, 4),  9)
@@ -81,9 +85,7 @@ object Advent06 {
     //   }).grouped(10).map(_.mkString).mkString("\n")
     // )
 
-    println(
-      input.map(a.sizeOf(_)).sorted.reverse.head
-    )
+    println(a.part1)
 
     // println(start)
     // println(
