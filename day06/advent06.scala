@@ -20,6 +20,8 @@ class Advent06(input: Seq[Point]) {
     if(dists(0)._1 == dists(1)._1) -1 else dists(0)._2
   }
 
+  def sumdist(p0: Point) = input.map(p0 - _).sum
+
   // def findTop(l: Seq[Point], start: Point = Point(5, 54)): Point = {
   //   val next = start.up.left
   //   val diff = l map { p => (p - start) - (p - next) }
@@ -55,8 +57,10 @@ class Advent06(input: Seq[Point]) {
     val cl = closest(p)
     sizeOf(closest)(closest(_) == closest(p))(p)
   }.sorted.reverse.head
-  // def part2 = {
-  // }
+
+  def part2 = input.map { p =>
+    sizeOf(sumdist)(sumdist(_) < 10000)(p)
+  }.sorted.reverse.head
 }
 
 object Advent06 {
@@ -85,7 +89,8 @@ object Advent06 {
     //   }).grouped(10).map(_.mkString).mkString("\n")
     // )
 
-    println(a.part1)
+    println(s"Part 1: ${a.part1}")
+    println(s"Part 2: ${a.part2}")
 
     // println(start)
     // println(
