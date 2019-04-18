@@ -1,5 +1,3 @@
-package advent2018
-
 import scala.io.Source
 
 case class Point(x: Int, y: Int) {
@@ -57,17 +55,15 @@ class Advent06(input: Seq[Point]) {
   }.sorted.reverse.head
 }
 
-object Advent06 {
-  def main(args: Array[String]): Unit = {
-    val fname = args.headOption.getOrElse("example.txt")
-    val Pat = "([0-9]+), ([0-9]+)".r
-    val input = Source.fromFile(fname).getLines.map {
-      case Pat(x, y) => Point(Integer.parseInt(x), Integer.parseInt(y))
-    }.toList
+@main
+def main(fname: String = "example.txt"): Unit = {
+  val Pat = "([0-9]+), ([0-9]+)".r
+  val input = Source.fromFile(fname).getLines.map {
+    case Pat(x, y) => Point(Integer.parseInt(x), Integer.parseInt(y))
+  }.toList
 
-    val a = new Advent06(input)
+  val a = new Advent06(input)
 
-    println(s"Part 1: ${a.part1}")
-    println(s"Part 2: ${a.part2}")
-  }
+  println(s"Part 1: ${a.part1}")
+  println(s"Part 2: ${a.part2}")
 }
