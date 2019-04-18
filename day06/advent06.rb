@@ -8,11 +8,25 @@ class Point
   def dist(other)
     (other.x - @x).abs + (other.y - @y).abs
   end
-  def ==(other)
-    other.x == @x and other.y == @y
+
+  def eql?(other)
+    other.is_a?(Point) and other.x == @x and other.y == @y
   end
 
-  alias :eql? :==
+  def hash
+    [@x, @y].hash
+  end
+
+  def to_s
+    "(#{x}, #{y})"
+  end
+
+  def ns
+    [ Point.new(x, y-1),
+      Point.new(x, y+1),
+      Point.new(x-1, y),
+      Point.new(x+1, y) ]
+  end
 end
 
 class Advent06
@@ -26,6 +40,10 @@ class Advent06
     end
   end
 
+  def sumdist(p)
+    @input.map do |n| n.dist(p) end.sum
+  end
+
   def closest(p)
     c = @input.each_with_index.map do | o, i |
       [ o.dist(p), i ]
@@ -33,10 +51,30 @@ class Advent06
       dist
     end
     if c[0][0] == c[1][0] # same distance
-      "."
+      -1
     else
-      (c[0][1] + "a".ord).chr
+      c[0][1]
     end
+  end
+
+  def sizeOf(measure, pred, start)
+    seen = Set.new
+    stack = [start]
+    size = 0
+    while stack.length > 0
+      p = stack.pop
+      if seen.include?(p) then next end
+      seen << p
+      score = measure.call(p)
+      if score == -1 then next end
+      ns = p.ns.filter &pred
+      if ns.any? do |n| infinite(p, n) end
+        return -1
+      end
+      size += 1
+      stack += ns
+    end
+    size
   end
 end
 
@@ -47,13 +85,19 @@ def read(lines)
   }
 end
 
-points = read(File.readlines("example.txt"))
-a = Advent06.new points
+fname = ARGV.length > 0 ? ARGV[0] : "example.txt"
+input = read(File.readlines fname)
+a = Advent06.new(input)
 
-(0..9).each do |y|
-  (0..9).each do |x|
-    print a.closest(Point.new(x, y))
-  end
-  print "\n"
-end
+part1 = input.map do |p|
+  cl = a.closest(p)
+  a.sizeOf(a.method(:closest),
+           -> n { a.closest(n) == cl }, p)
+end.sort.reverse[0]
+puts "Part 1: #{part1}"
 
+part2 = input.map do |p|
+  a.sizeOf(a.method(:sumdist),
+           -> n { a.sumdist(n) < 10000 }, p)
+end.sort.reverse[0]
+puts "Part 2: #{part2}"
