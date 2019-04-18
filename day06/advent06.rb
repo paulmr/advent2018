@@ -67,7 +67,7 @@ class Advent06
       seen << p
       score = measure.call(p)
       if score == -1 then next end
-      ns = p.ns.filter &pred
+      ns = p.ns.select &pred
       if ns.any? do |n| infinite(p, n) end
         return -1
       end
