@@ -86,18 +86,26 @@ def read(lines)
 end
 
 fname = ARGV.length > 0 ? ARGV[0] : "example.txt"
+
 input = read(File.readlines fname)
 a = Advent06.new(input)
+
+byx = input.map do |p| p.x end.sort
+byy = input.map do |p| p.y end.sort
+
+mid = Point.new(
+  (byx[0] + byx[byx.length - 1]) / 2,
+  (byy[0] + byy[byy.length - 1]) / 2)
+
+max = 10000
 
 part1 = input.map do |p|
   cl = a.closest(p)
   a.sizeOf(a.method(:closest),
            -> n { a.closest(n) == cl }, p)
 end.sort.reverse[0]
-puts "Part 1: #{part1}"
+puts "part 1: #{part1}"
 
-part2 = input.map do |p|
-  a.sizeOf(a.method(:sumdist),
-           -> n { a.sumdist(n) < 10000 }, p)
-end.sort.reverse[0]
+part2 = a.sizeOf(a.method(:sumdist),
+                 -> n { a.sumdist(n) < max }, mid)
 puts "Part 2: #{part2}"
