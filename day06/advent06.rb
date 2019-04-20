@@ -41,7 +41,7 @@ class Advent06
   end
 
   def sumdist(p)
-    @input.map do |n| n.dist(p) end.sum
+    @input.map do |n| n.dist(p) end.inject(&:+)
   end
 
   def closest(p)
