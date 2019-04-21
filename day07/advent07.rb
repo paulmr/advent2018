@@ -18,6 +18,10 @@ class Advent
     @inv[v].add k
   end
 
+  def start(k)
+    @state[k] = :in_progress
+  end
+
   def resolve(k)
     @state[k] = :complete
   end
@@ -32,33 +36,61 @@ class Advent
     end.sort
   end
 
+  def complete
+    @state.all? do |k,v| v == :complete end
+  end
+
 end
 
 fname = ARGV.length > 0 ? ARGV[0] : "example.txt"
 input = File.readlines fname
 
-@deps = []
+deps = []
 
 input.map do |l|
   if not %r(Step ([A-Z]) must be finished before step ([A-Z]) can begin.).match(l)
     puts "Bad line"
   end
-  @deps.push [$2, $1]
+  deps.push [$2, $1]
 end
 
-a = Advent.new @deps
+def part1(deps)
+  a = Advent.new deps
 
-order = []
-while a.ready.length > 0
-  nxt = a.ready[0]
-  order.push nxt
-  a.resolve nxt
+  order = []
+  while a.ready.length > 0
+    nxt = a.ready[0]
+    order.push nxt
+    a.resolve nxt
+  end
+
+  order.join
 end
 
-puts order.join
+def part2(deps)
+  a = Advent.new deps
+  events = []
+  workers = 5
+  time = 0
+  offset = 60
 
-#def part2
-  #a = Advent.new @deps
-#end
+  while not a.complete
+    # first assign any ready workers to work
+    while (a.ready.length > 0 and workers > 0)
+      workers -= 1
+      next_work = a.ready[0]
+      end_time = (next_work.ord - ('A'.ord - 1)) + time + offset
+      events.push [ next_work, end_time ]
+      a.start next_work
+    end
 
-#puts part1
+    events.sort_by! do | k, v | v end
+    k, time = events.shift
+    a.resolve(k)
+    workers += 1
+  end
+  time
+end
+
+puts "Part 1: #{part1 deps}"
+puts "Part 2: #{part2 deps}"
