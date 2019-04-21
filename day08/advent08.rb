@@ -12,6 +12,20 @@ class Node
     ch + @metas.reduce(0, :+)
   end
 
+  def value
+    if @children.length == 0
+      meta_sum
+    else
+      @metas.map do |m|
+        if m > 0 and m <= @children.length
+          @children[m-1].value
+        else
+          0
+        end
+      end.reduce(0, :+)
+    end
+  end
+
   def self.read(input)
     num_children = input.shift
     num_metas = input.shift
@@ -39,4 +53,5 @@ end
 
 n = Node.read(nums)
 
-puts n.meta_sum
+puts "Part 1: #{n.meta_sum}"
+puts "Part 2: #{n.value}"
