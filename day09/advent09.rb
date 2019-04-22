@@ -20,7 +20,6 @@ class Node
 
   def remove(n = 7)
     if n == 0
-      puts "removing #{number}"
       counterclockwise.clockwise = clockwise
       clockwise.counterclockwise = counterclockwise
       self
@@ -34,33 +33,26 @@ class Node
   end
 end
 
-def print_nodes(root, current)
-  res = []
-  n = root
-  while true
-    res << (n == current ? "(#{n.number})" :  "#{n.number}")
-    n = n.clockwise
-    break if n == root
-  end
-  puts res.join(" ")
-end
-
-def part1(max)
+def solve(max, players)
+  scores = [0] * players
   root = Node.new 0
   root.clockwise = root
   root.counterclockwise = root
   current = root
+  player = 0
 
   (1..max).each { |n|
     if n % 23 == 0
       rem = current.remove
+      scores[player] += (n + rem.number)
       current = rem.clockwise
     else
       current = current.add_marble n
     end
+    player = (player + 1) % players
   }
-
-  print_nodes(root, current)
+  scores.sort[-1]
 end
 
-part1 25
+puts "Part 1: #{solve 71307, 458}"
+puts "Part 2: #{solve 71307 * 100, 458}"
