@@ -1,7 +1,5 @@
 package advent
 
-import org.scalajs.dom
-import org.querki.jquery._
 import scala.io.Source
 
 case class Point(x: Int, y: Int) {
@@ -14,27 +12,28 @@ case class Star(position: Point, velocity: Point) {
 
 case class Stars(stars: List[Star]) {
   override def toString = {
-    (for(row <- makeGrid) yield {
-      (for(star <- row) yield if(star.isDefined) "#" else ".").mkString
+    val (min, max) = gridDims
+    (for(y <- (min.y to max.y)) yield {
+      (for(x <- min.x to max.x) yield {
+        if(stars.exists(s => s.position.x == x && s.position.y == y)) "#" else "."
+      }).mkString
     }).mkString("\n")
   }
-  def gridDims: (Point, Point) = {
+
+  lazy val gridDims: (Point, Point) = {
     val minx = stars.map(_.position.x).min
     val miny = stars.map(_.position.y).min
     val maxx = stars.map(_.position.x).max
     val maxy = stars.map(_.position.y).max
     (Point(minx, miny), Point(maxx, maxy))
   }
-  def makeGrid: List[List[Option[Star]]] = {
-    val (max, min) = gridDims
-    (for(y <- (min.y to max.y)) yield {
-      (for(x <- (min.x to max.x)) yield {
-        stars.find(s => s.position.x == x && s.position.y == y)
-      }).toList
-    }).toList
+
+  lazy val size: Point = {
+    val (min, max) = gridDims
+    Point(max.x - min.x, max.y - min.y)
   }
+
   def next = copy(stars = stars.map(_.next))
-  def complete(steps: Int): Stars = if(steps == 0) this else next.complete(steps - 1)
 }
 
 object Stars {
@@ -57,34 +56,18 @@ object Star {
 }
 
 object Advent10 {
-  def updateView(parentDom: dom.Node, stars: Stars) = {
-    val parent = $(parentDom)
-    parent.empty()
-    for(row <- stars.makeGrid) {
-      val rowElement = $("""<div class="row"></div>""")
-      for(star <- row) {
-        val starEl = $("""<span class="star"></span>""")
-        if(star.isDefined) starEl.addClass("active")
-        rowElement.append(starEl)
-      }
-      parent.append(rowElement)
-    }
+
+  @annotation.tailrec
+  def solve(stars: Stars, last: Stars): Stars = {
+    if(stars.size.x < last.size.x && stars.size.y < last.size.y)
+      solve(stars.next, stars)
+    else
+      last
   }
 
-  def main(args: Array[String]): Unit = ${ () =>
+  def main(args: Array[String]): Unit = {
     val inputFile = args.headOption.getOrElse("../example.txt")
-    // val stars = Stars.fromString(Source.fromFile(inputFile).mkString)
-    var stars = Stars.fromString(Advent10Input.example)
-    // var stars = Stars.fromString(Advent10Input.input10)
-
-    val parent = dom.document.getElementById("canvas")
-    // updateView(parent, stars)
-    // dom.console.log(stars.toString)
-
-    dom.document.getElementById("next-button").addEventListener("click", (ev: dom.Event) => {
-      updateView(parent, stars)
-      stars = stars.next
-    })
-
+    val stars = Stars.fromString(Source.fromFile(inputFile).mkString)
+    println(solve(stars.next, stars))
   }
 }
