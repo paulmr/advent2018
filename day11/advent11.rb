@@ -1,5 +1,3 @@
-require 'minitest/autorun'
-
 class Advent
   attr_reader :serial, :grid
   def initialize(serial, max_x = 300, max_y = 300)
@@ -18,11 +16,19 @@ class Advent
   def power_of_sq(x, y, sz)
     @memo[[x,y,sz]] ||=
       begin
+        puts [x,y,sz].join(",")
         if sz == 1 then power_of(x,y)
         else
-          row = (x..x-1+sz).map { |x| power_of(x,y) }.sum
-          col = (y+1..y-1+sz).map { |y| power_of(x,y) }.sum
-          row + col + power_of_sq(x+1,y+1,sz-1)
+          row = (x..x-1+sz).map do |x|
+            # puts "#{x},#{y-1+sz} = #{power_of(x,y-1+sz)}"
+            power_of(x,y-1+sz)
+          end.sum
+          col = (y..y-2+sz).map do |y|
+            # puts "#{x-1+sz},#{y} = #{power_of(x-1+sz,y)}"
+            power_of(x-1+sz,y)
+          end.sum
+          # puts "======"
+          row + col + power_of_sq(x,y,sz-1)
         end
       end
   end
@@ -35,36 +41,25 @@ class Advent
     end.max_by { |a| a[2] }
   end
 
+  def solve_for(x,y)
+    lim = [ @max_x + 1 - x, @max_y + 1 - y ].min
+    # puts "x: #{x}, y: #{y}, lim: #{lim}"
+    sz = (1..lim).max_by { |sz| power_of_sq(x,y,sz) }
+    [ x, y, sz, power_of_sq(x,y,sz) ]
+  end
+
   def solve2
-    @max_x.downto(1).map do |sz|
-      puts "Size: #{sz}"
-      x,y,p = solve1(sz)
-      [ x,y,sz,p ]
-    end.may_by { |a| a[3] }
+    (1..@max_y).flat_map do |y|
+      (1..@max_x).map do |x|
+        solve_for(x,y)
+      end
+    end.max_by { |a| a[3] }
   end
 end
 
-class AdventTest < Minitest::Test
-  [ [ 3, 5, 8, 4 ],
-    [ 122, 79, 57, -5 ],
-    [ 217, 196, 39, 0 ],
-    [ 101, 153, 71, 4 ]
-  ].each do |x,y,serial,exp|
-    define_method("test_example_#{x}_#{y}") do
-      assert_equal exp, Advent.new(serial).power_of(x,y)
-    end
-  end
-
-  def test_square
-    assert_equal 29, Advent.new(18).power_of_sq(33,45, 3)
-  end
-
-  def test_solve
-    skip
-    assert_equal [33, 45, 29], Advent.new(18).solve
-    assert_equal [21, 61, 30], Advent.new(42).solve
-  end
-end
-
-puts Advent.new(8199).solve1
-puts Advent.new(8199).solve2
+#puts Advent.new(8199).solve1
+#p Advent.new(18).solve_for(90,269)
+p Advent.new(18).solve2
+# p Advent.new(42).solve_for(232,251)
+# p Advent.new(18).power_of_sq(33,45,3)
+# puts Advent.new(8199).solve2
