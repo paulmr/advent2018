@@ -5,21 +5,19 @@ case class Advent11(serial: Int, xmax: Int = 300, ymax: Int = 300) {
     ((power / 100) % 10) - 5
   }
 
-  private val _image = scala.collection.mutable.Map.empty[(Int, Int), Long]
-
-  def image(x: Int, y: Int): Long = _image.get(x -> y).getOrElse {
-    if(x < 1 || y < 1 || x > xmax || y > ymax) 0L else {
-      val res = powerOf(x, y) + image(x-1, y) + image(x,y-1) - image(x - 1, y - 1)
-      _image += ((x -> y) -> res)
-      res
+  private lazy val image = {
+    val a = Array.fill(ymax + 1)(Array.fill(xmax + 1)(0L))
+    for(y <- (1 to ymax); x <- (1 to xmax)) {
+      a(y)(x) = powerOf(x, y) + a(y)(x-1) + a(y-1)(x) - a(y-1)(x - 1)
     }
+    a.map(_.toVector).toVector
   }
 
   def square(x: Int, y: Int, sz: Int) = {
-    val a = image(x - 1, y - 1)
-    val b = image(x - 1, y - 1 + sz)
-    val c = image(x - 1 + sz, y - 1)
-    val d = image(x - 1 + sz, y - 1 + sz)
+    val a = image(y - 1)(x - 1)
+    val b = image(y - 1 + sz)(x - 1)
+    val c = image(y - 1)(x - 1 + sz)
+    val d = image(y - 1 + sz)(x - 1 + sz)
     a + (d - b - c)
   }
 
@@ -46,6 +44,5 @@ case class Advent11(serial: Int, xmax: Int = 300, ymax: Int = 300) {
 }
 
 val a = Advent11(8199)
-
 println(a.part1)
 println(a.part2)
