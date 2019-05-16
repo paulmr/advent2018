@@ -43,7 +43,7 @@ class Advent
 
   def part1
     m = -Float::INFINITY
-    mx = 0; my = 0
+    mx = my = 0
     coords(3) do |x,y|
       s = square(x,y,3)
       if m < s
@@ -56,28 +56,26 @@ class Advent
   end
 
   def part2
-    max = nil
-
+    m = -Float::INFINITY
+    mx = my = msz = 0
     (1..max_x).each do |sz|
-      coords(sz).each do |x,y|
-        r = [x,y,sz,square(x,y,sz)]
-        # p r
-        if not max
-          max = r
-        else
-          max = max[3] < r[3] ? r : max
+      coords(sz) do |x,y|
+        r = square(x,y,sz)
+        if m < r
+          m = r; mx = x; my = y; msz =sz
         end
       end
     end
-    max
+    [mx, my, msz]
   end
 end
 
-# advent = Advent.new(8199)
-advent = Advent.new(18)
+advent = Advent.new(8199)
+# advent = Advent.new(18)
 # puts advent.part1.join(",")
-# puts advent.part2.join(",")
+
 puts advent.part1.join(",")
+puts advent.part2.join(",")
 
 # puts Advent.new(18).square(90,269,16)
 
