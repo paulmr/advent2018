@@ -33,6 +33,8 @@ case class Advent11(serial: Int, xmax: Int = 300, ymax: Int = 300) {
   }
 }
 
-val a = Advent11(8199)
-println(a.part1)
-println(a.part2)
+object Main extends App {
+  val a = Advent11(8199)
+  println(a.part1)
+  println(a.part2)
+}
