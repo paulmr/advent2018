@@ -4,7 +4,15 @@ class Advent
     @serial = serial
     @max_x = max_x
     @max_y = max_y
-    @image = {}
+    @image = build_image
+  end
+
+  def build_image
+    a = Array.new(max_y + 1) { Array.new(max_x + 1, 0) }
+    coords { |x,y|
+      a[y][x] = power_of(x,y) + a[y][x - 1] + a[y - 1][x] - a[y - 1][x - 1]
+    }
+    a
   end
 
   def power_of(x, y)
@@ -14,20 +22,15 @@ class Advent
   end
 
   def coords(lim = 0)
-    (1..max_y-lim-1).flat_map do |y|
-      (1..max_x-lim-1).map { |x| [x,y] }
+    (1..max_y-lim-1).each do |y|
+      (1..max_x-lim-1).each do |x|
+        yield(x,y)
+      end
     end
   end
 
   def image(x,y)
-    @image[[x,y]] ||=
-      begin
-        if x < 1 or y < 1 or x > max_x or y > max_y
-          0
-        else
-          power_of(x,y) + image(x - 1, y) + image(x, y - 1) - image(x - 1, y - 1)
-        end
-      end
+    @image[y][x]
   end
 
   def square(x,y,sz)
@@ -39,9 +42,17 @@ class Advent
   end
 
   def part1
-    coords(3).max_by do |x,y|
-      square(x,y,3)
+    m = -Float::INFINITY
+    mx = 0; my = 0
+    coords(3) do |x,y|
+      s = square(x,y,3)
+      if m < s
+        m = s
+        mx = x
+        my = y
+      end
     end
+    [mx,my]
   end
 
   def part2
@@ -65,7 +76,8 @@ end
 # advent = Advent.new(8199)
 advent = Advent.new(18)
 # puts advent.part1.join(",")
-puts advent.part2.join(",")
+# puts advent.part2.join(",")
+puts advent.part1.join(",")
 
 # puts Advent.new(18).square(90,269,16)
 
