@@ -7,7 +7,7 @@ case class Advent11(serial: Int, xmax: Int = 300, ymax: Int = 300) {
 
   private lazy val image = {
     val a = Array.fill(ymax + 1)(Array.fill(xmax + 1)(0L))
-    for(y <- (1 to ymax); x <- (1 to xmax)) {
+    coords().foreach { case (x, y) =>
       a(y)(x) = powerOf(x, y) + a(y)(x-1) + a(y-1)(x) - a(y-1)(x - 1)
     }
     a.map(_.toVector).toVector
@@ -21,25 +21,15 @@ case class Advent11(serial: Int, xmax: Int = 300, ymax: Int = 300) {
     a + (d - b - c)
   }
 
-  def part1 = {
-    val (x, y) = (for {
-      y <- (1 to (ymax - 3 - 1))
-      x <- (1 to (xmax - 3 - 1))
-    } yield {
-      (x -> y)
-    }).maxBy { case (x, y) => square(x, y, 3) }
-    s"$x,$y"
-  }
+  def coords(lim: Int = 0) =
+    (for(y <- 1 to (ymax - lim - 1); x <- 1 to (xmax - lim - 1)) yield (x, y)).iterator
+
+  def part1 =
+    coords(3).maxBy { case (x, y) => square(x, y, 3) }
 
   def part2 = {
-    val (x, y, sz, _) = (for {
-      sz <- (1 to xmax)
-      y  <- (1 to (ymax - sz - 1))
-      x  <- (1 to (xmax - sz - 1))
-    } yield {
-      (x, y, sz, square(x, y, sz))
-    }).maxBy(_._4)
-    s"$x,$y,$sz"
+    val sizes = for(sz <- (1 to xmax).iterator; (x, y) <- coords(sz)) yield (x, y, sz)
+    sizes.maxBy { case (x, y, sz) => square(x, y, sz) }
   }
 }
 
