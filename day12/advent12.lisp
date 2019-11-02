@@ -5,7 +5,8 @@
 
 (defparameter example "#..#.#..##......###...###")
 
-(defun parse-initial-state (s) )
+(defun parse-initial-state (s)
+  (parse-state (subseq s 15)))
 
 (defun parse-rule (r)
   (let ((left (subseq r 0 5))
@@ -23,14 +24,14 @@
 	  `(,(+ offset start) . ,(subseq s start end)))))
 
 (defun read-input (fname)
-  (let ((fd (open fname)))
-	(parse-initial-state (read-line fd))
+  (let* ((fd (open fname))
+		 (initial (parse-initial-state (read-line fd))))
 	(read-line fd) ; blank after initial
 	(loop
 	   for line = (read-line fd nil)
 	   while line
-	   collect (parse-rule line)
-	   finally (close fd))))
+	   collect (parse-rule line) into rules
+	   finally (close fd) (return (cons initial rules)))))
 
 (defun next-state (rules s offset)
   (setq s (concatenate '(vector bit) #*0000 s #*0000))
@@ -77,17 +78,47 @@
 ;; (let ((s (parse-state example)))
 ;;   (split-state (concatenate '(vector bit) #*00000 s #*00000)))
 
-;; examples
-(let
-	((rules (make-rules (read-input "example.txt"))))
+(defun sum-of-state (s offset)
+  (loop
+	 for b across s
+	 for i from 0
+	 when (= b 1)
+	   sum (+ i offset)))
 
-  (defun calc (initial-state n)
+;; examples
+(defun doit (fname count)
+  (let* ((input (read-input fname))
+		 (initial-state (car input))
+		 (ruledesc (cdr input))
+		 (rules (make-rules ruledesc))
+		 (seen (make-hash-table)))
 	(loop
-	   repeat n
-	   for gen from 0
-	   for (offset . state) = (cons 0 initial-state) then (next-state rules state offset)
-	   finally (return (trim-state state offset))))
-  (calc (parse-state example) 20)
-  ;;  (aref rules 9)
-  ;; (print (format-state (next-state rules (parse-state example))))
+	   repeat (1+ count)
+	   for (offset . state) = (cons 0 initial-state)
+	   then
+		 (let ((next (next-state rules state offset)))
+		   (trim-state (cdr next) (car next)))
+	   if (gethash state seen) return "seen"
+	   do (setf (gethash state seen) t)
+	   finally (return (sum-of-state state offset))
+		 ))
+
   )
+  ;; (let
+  ;; 	  (((initial . rules) ))
+
+  ;; 	(defun calc (initial-state n)
+  ;; 	  (loop
+  ;; 		 repeat n
+  ;; 		 for gen from 0
+
+  ;; 	(let ((res (calc (parse-state example) 21)))
+  ;; 	  (sum-of-state (cdr res) (car res))
+  ;; 	  )
+  ;; 	;;  (aref rules 9)
+  ;; 	;; (print (format-state (next-state rules (parse-state example))))
+  ;; 	)
+
+;; (doit "/sdcard/lisp/example.txt" 20)
+(print (doit "/sdcard/lisp/input12.txt" 20))
+(print (doit "/sdcard/lisp/input12.txt" 50000000000))
