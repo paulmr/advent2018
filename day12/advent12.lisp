@@ -91,19 +91,30 @@
 		 (initial-state (car input))
 		 (ruledesc (cdr input))
 		 (rules (make-rules ruledesc))
-		 (seen (make-hash-table)))
+		 (last-sum 0)
+		 (last-diff 0)
+		 (last-count 0))
 	(loop
 	   repeat (1+ count)
+	   for gen from 0
 	   for (offset . state) = (cons 0 initial-state)
 	   then
 		 (let ((next (next-state rules state offset)))
 		   (trim-state (cdr next) (car next)))
-	   if (gethash state seen) return "seen"
-	   do (setf (gethash state seen) t)
-	   finally (return (sum-of-state state offset))
-		 ))
+	   for sum = (sum-of-state state offset)
+	   for diff = (- sum last-sum)
+	   if (= diff last-diff)
+	   do
+		 (incf last-count)
+		 (if (> last-count 10)
+			 ;; detected linear progression, so just extrapolate
+			 (return (+ sum (* last-diff (- count gen)))))
+	   else do (setq last-count 0)
+	   do
+		 (setq last-sum sum)
+		 (setq last-diff diff)
+	   finally (return (sum-of-state state offset)))))
 
-  )
   ;; (let
   ;; 	  (((initial . rules) ))
 
@@ -120,5 +131,7 @@
   ;; 	)
 
 ;; (doit "/sdcard/lisp/example.txt" 20)
-(print (doit "/sdcard/lisp/input12.txt" 20))
-(print (doit "/sdcard/lisp/input12.txt" 50000000000))
+
+(format t "Part 1: ~d~%Part 2: ~d~%"
+		(doit "/sdcard/lisp/input12.txt" 20)
+		(doit "/sdcard/lisp/input12.txt" 50000000000))
