@@ -1,5 +1,4 @@
 #!/usr/bin/env -S cl -E advent12:main
-
 (defpackage :advent12
   (:export :main)
   (:use :common-lisp))
@@ -40,7 +39,6 @@
   `(,offset .
 	  ,(map '(vector bit)
 			(lambda (p)
-										; (format t "~A [~d] => ~d~%" (format-state p) (bits-to-integer p) (aref rules (bits-to-integer p)))
 			  (aref rules (bits-to-integer p)))
 			(split-state s))))
 
@@ -54,15 +52,6 @@
 
 (defun parse-state (s)
   (map '(vector bit) (lambda (n) (if (char= #\# n) 1 0)) s))
-
-(defun format-state (s offset)
-  ;; -3 is the window size that is used to display the output in the example
-  (let ((bump (- offset -3)))
-	(setq s
-		  (if (> bump 0)
-			  (concatenate '(vector bit) (make-array bump :element-type '(vector bit) :initial-element 0) s)
-			  (subseq s (abs bump)))))
-  (map 'string (lambda (b) (if (zerop b) #\. #\#)) s))
 
 (defun bits-to-integer (bits)
   (loop
@@ -112,25 +101,8 @@
 		 (setq last-diff diff)
 	   finally (return (sum-of-state state offset)))))
 
-  ;; (let
-  ;; 	  (((initial . rules) ))
-
-  ;; 	(defun calc (initial-state n)
-  ;; 	  (loop
-  ;; 		 repeat n
-  ;; 		 for gen from 0
-
-  ;; 	(let ((res (calc (parse-state example) 21)))
-  ;; 	  (sum-of-state (cdr res) (car res))
-  ;; 	  )
-  ;; 	;;  (aref rules 9)
-  ;; 	;; (print (format-state (next-state rules (parse-state example))))
-  ;; 	)
-
-;; (doit "/sdcard/lisp/example.txt" 20)
-
 (defun main (argv)
-(let ((fname (or (car argv) "input12.txt")))
-(format t "Part 1: ~d~%Part 2: ~d~%"
-		(doit fname 20)
-		(doit fname 50000000000))))
+  (let ((fname (or (car argv) "input12.txt")))
+	(format t "Part 1: ~d~%Part 2: ~d~%"
+			(doit fname 20)
+			(doit fname 50000000000))))
