@@ -1,9 +1,10 @@
+#!/usr/bin/env -S cl -E advent12:main
+
 (defpackage :advent12
+  (:export :main)
   (:use :common-lisp))
 
 (in-package :advent12)
-
-(defparameter example "#..#.#..##......###...###")
 
 (defun parse-initial-state (s)
   (parse-state (subseq s 15)))
@@ -36,7 +37,6 @@
 (defun next-state (rules s offset)
   (setq s (concatenate '(vector bit) #*0000 s #*0000))
   (setq offset (- offset 2))
-;  (format t "calculating next state for: ~A~%~%" (format-state s))
   `(,offset .
 	  ,(map '(vector bit)
 			(lambda (p)
@@ -75,8 +75,6 @@
   (loop
 	 for i from 0 to (- (length s) 5)
 	 collect (subseq s i (+ 5 i))))
-;; (let ((s (parse-state example)))
-;;   (split-state (concatenate '(vector bit) #*00000 s #*00000)))
 
 (defun sum-of-state (s offset)
   (loop
@@ -85,7 +83,6 @@
 	 when (= b 1)
 	   sum (+ i offset)))
 
-;; examples
 (defun doit (fname count)
   (let* ((input (read-input fname))
 		 (initial-state (car input))
@@ -132,6 +129,8 @@
 
 ;; (doit "/sdcard/lisp/example.txt" 20)
 
+(defun main (argv)
+(let ((fname (or (car argv) "input12.txt")))
 (format t "Part 1: ~d~%Part 2: ~d~%"
-		(doit "/sdcard/lisp/input12.txt" 20)
-		(doit "/sdcard/lisp/input12.txt" 50000000000))
+		(doit fname 20)
+		(doit fname 50000000000))))
