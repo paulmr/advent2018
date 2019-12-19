@@ -1,6 +1,8 @@
 import scala.io.Source
 
-object Advent15 extends App {
+object Advent15 extends AdventApp {
+  type Input = State
+
   sealed abstract class Cell(val c: Char)
   case object Wall extends Cell('#')
   case object Floor extends Cell('.')
@@ -150,17 +152,20 @@ object Advent15 extends App {
     }
   }
 
-  def part1(st: State, count: Int = 0): Unit = {
-    val nxt = tick(st)
-    if (nxt.isComplete) {
-      val score = st.score * (count - 1)
-      println(s"Part 1: $score")
-    } else {
-      part1(nxt, count + 1)
+  def part1(st0: State): Unit = {
+    def recurse(st: State, count: Int = 0) {
+      val nxt = tick(st)
+      if (nxt.isComplete) {
+        val score = st.score * (count - 1)
+        println(s"Part 1: $score")
+      } else {
+        recurse(nxt, count + 1)
+      }
     }
+    recurse(st0)
   }
 
-  def part2(st0: State) = {
+  def part2(st0: State): Unit = {
     def recurse(st: State, count: Int = 0): Option[Int] = {
       val nxt = tick(st)
       if (st.elves.length != nxt.elves.length) None
@@ -179,7 +184,7 @@ object Advent15 extends App {
     println(s"Part 2: ${search(3)}")
   }
 
-  val input =
+  lazy val input =
     """################################
       |#############..#################
       |#############..#.###############
@@ -213,7 +218,5 @@ object Advent15 extends App {
       |#################..#####.#######
       |################################""".stripMargin
 
-  val st = parseSource(Source.fromString(input))
-  part1(st)
-  part2(st)
+  lazy val getInput: Input = parseSource(Source.fromString(input))
 }
