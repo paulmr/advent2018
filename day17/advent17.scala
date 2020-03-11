@@ -1,5 +1,3 @@
-package advent
-
 object const {
   val SIZE = 1000
 }
@@ -29,15 +27,38 @@ case class State(rows: Axis[Axis[Item]] = Axis(Axis(Sand : Item, const.SIZE), co
   def put(x: Int, y: Int, value: Item) = copy(rows = rows.put(y, rows.get(y).put(x, value)))
 }
 
-object Advent17 {
+object Advent17 extends AdventApp {
+  type Input = State
 
-  def main(args: Array[String]) = {
-    val s = State().put(-10, -20, Fountain)
-    println(s.get(-10, -20))
-    // val s = State()
-    // println(s.put(5, 5, Clay).put(5, 5, StillWater).get(5, 5))
+  lazy val DoubleRange = """(-?[0-9]+)\.\.(-?[0-9]+)""".r
+
+  def parseRange(s: String) = s match {
+    case DoubleRange(min, max) =>
+      min.toInt to max.toInt
+    case _ => s.toInt to s.toInt
   }
 
+
+  def getInput() = {
+    val Line = """^([xy])=([0-9.]+)\s*, ([xy])=([0-9.]+)""".r
+    scala.io.Source.fromFile("day17/example.txt").getLines
+      .foldLeft(State()) { (acc, line) =>
+        println(s"[$line]")
+        line match {
+          case Line(xy1, left, xy2, right) =>
+            val (xRange, yRange) =
+              if(xy1 == "x") (left, right) else (right, left)
+            xRange.zip(yRange).foldLeft(acc) { (acc, xy) =>
+              acc.put(xy._1, xy._2, Clay)
+            }
+          case _ => acc
+        }
+    }
+  }
+
+
+  def part1(input: State) = ()
+  def part2(input: State) = ()
 }
 
 // class State(rows: Vector[Vector[Item]] {
